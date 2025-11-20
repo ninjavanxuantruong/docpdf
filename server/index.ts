@@ -1,11 +1,11 @@
 import express from "express";
-import fetch from "node-fetch";
 import cors from "cors";
+import fetch from "node-fetch";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Bật CORS cho tất cả origin (có thể giới hạn nếu muốn)
+// Bật CORS cho tất cả origin
 app.use(cors());
 
 app.get("/pdf/:id", async (req, res) => {
@@ -16,12 +16,11 @@ app.get("/pdf/:id", async (req, res) => {
     const response = await fetch(driveUrl);
     if (!response.ok) throw new Error("Drive fetch failed");
 
-    const buffer = await response.buffer();
+    const buffer = await response.arrayBuffer();
 
-    // Trả về PDF với header CORS
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Access-Control-Allow-Origin", "*"); // đảm bảo cho browser
-    res.send(buffer);
+    // Không cần set lại Access-Control-Allow-Origin thủ công, cors middleware lo rồi
+    res.send(Buffer.from(buffer));
   } catch (err) {
     console.error(err);
     res.status(500).send("Không thể tải PDF từ Google Drive.");
